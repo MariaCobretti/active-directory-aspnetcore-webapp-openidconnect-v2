@@ -35,6 +35,12 @@ namespace TodoListService
                 .AddProtectedWebApi("AzureAd", Configuration, options => Configuration.Bind("AzureAD", options));
 
             services.AddControllers();
+
+            services.AddAuthorization(options =>
+            {
+                // Create policy to check for the scope 'read'
+                //options.AddPolicy("ReadScope", policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
