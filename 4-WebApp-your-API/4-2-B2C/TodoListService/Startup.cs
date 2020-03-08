@@ -46,7 +46,7 @@ namespace TodoListService
             {
                 // Create policy to check for the scope 'read'
                 options.AddPolicy("ReadScope", 
-                    policy => policy.Requirements.Add(new ScopesRequirement("read")));
+                    policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
             });
         }
 
