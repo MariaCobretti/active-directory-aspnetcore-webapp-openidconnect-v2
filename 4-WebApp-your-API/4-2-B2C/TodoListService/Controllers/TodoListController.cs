@@ -54,9 +54,11 @@ namespace TodoListService.Controllers
 
         // GET: api/values
         [HttpGet]
-        //[Authorize(Policy = "ReadScope")]
+        [Authorize(Policy = "ReadScope")]
         public IEnumerable<Todo> Get()
         {
+            var role = User.Claims;
+            var admin = User.IsInRole("97e07631-02dc-49ed-ae6a-6fe93c68833c");
             string owner = User.Identity.Name;
             return TodoStore.Values.Where(x => x.Owner == owner);
         }
@@ -70,6 +72,7 @@ namespace TodoListService.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "97e07631-02dc-49ed-ae6a-6fe93c68833c")]
         public void Delete(int id)
         {
             TodoStore.Remove(id);

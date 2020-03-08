@@ -17,7 +17,9 @@ namespace TodoListClient.Controllers
         }
 
         // GET: TodoList
-        [AuthorizeForScopes(ScopeKeySection = "TodoList:TodoListScope")]
+        //[AuthorizeForScopes(ScopeKeySection = "TodoList:TodoListScope")]
+        [AuthorizeForScopes(ScopeKeySection = "TodoList:ReadScope")]
+        //[AuthorizeForScopes(Scopes = new[] { "https://721b2ctesttenant.onmicrosoft.com/a43bbb3f-ac26-4c6e-875e-af559ecddc36/tasks.read" })]
         public async Task<ActionResult> Index()
         {
             return View(await _todoListService.GetAsync());

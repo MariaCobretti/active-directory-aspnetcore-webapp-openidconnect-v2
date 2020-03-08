@@ -39,6 +39,7 @@ namespace TodoListService
                     Configuration.Bind("AzureAdB2C", options);
 
                     options.TokenValidationParameters.NameClaimType = "name";
+                    options.TokenValidationParameters.RoleClaimType = "groups";
                 });
 
             services.AddControllers();
