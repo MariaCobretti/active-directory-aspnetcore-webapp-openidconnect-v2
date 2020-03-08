@@ -22,6 +22,9 @@
                 @Html.DisplayNameFor(model => model.Owner)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.MoveInDate)
+            </th>
+            <th>
                 Actions
             </th>
         </tr>
@@ -37,6 +40,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Owner)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MoveInDate)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |

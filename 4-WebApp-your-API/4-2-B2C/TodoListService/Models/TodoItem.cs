@@ -12,5 +12,7 @@ namespace TodoListService.Models
         public string Title { get; set; }
 
         public string Owner { get; set; }
+
+        public string MoveInDate { get; set; }
     }
 }

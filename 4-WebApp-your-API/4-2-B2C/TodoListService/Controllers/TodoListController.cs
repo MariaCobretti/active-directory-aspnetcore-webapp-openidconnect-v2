@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TodoListService.Models;
 
 namespace TodoListService.Controllers
@@ -39,16 +40,18 @@ namespace TodoListService.Controllers
         private static readonly Dictionary<int, Todo> TodoStore = new Dictionary<int, Todo>();
 
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IAuthorizationService _authorizationService;
 
-        public TodoListController(IHttpContextAccessor contextAccessor)
+        public TodoListController(IHttpContextAccessor contextAccessor, IAuthorizationService authorizationService)
         {
-            this._contextAccessor = contextAccessor;
+            _contextAccessor = contextAccessor;
+            _authorizationService = authorizationService;
 
             // Pre-populate with sample data
             if (TodoStore.Count == 0)
             {
-                TodoStore.Add(1, new Todo() { Id = 1, Owner = $"{this._contextAccessor.HttpContext.User.Identity.Name}", Title = "Pick up groceries" });
-                TodoStore.Add(2, new Todo() { Id = 2, Owner = $"{this._contextAccessor.HttpContext.User.Identity.Name}", Title = "Finish invoice report" });
+                TodoStore.Add(1, new Todo() { Id = 1, Owner = $"{this._contextAccessor.HttpContext.User.Identity.Name}", Title = "Pick up groceries", MoveInDate = "01.01.2020" });
+                TodoStore.Add(2, new Todo() { Id = 2, Owner = $"{this._contextAccessor.HttpContext.User.Identity.Name}", Title = "Finish invoice report", MoveInDate = "02.01.2020" });
             }
         }
 
@@ -66,9 +69,22 @@ namespace TodoListService.Controllers
         // GET: api/values
         [HttpGet("{id}", Name = "Get")]
         //[Authorize(Policy = "ReadScope")]
-        public Todo Get(int id)
+        public async Task<Todo> Get(int id)
         {
-            return TodoStore.Values.FirstOrDefault(t => t.Id == id);
+            var todo = TodoStore.Values.FirstOrDefault(t => t.Id == id);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, todo, "EditTaskPolicy");
+            if (authorizationResult.Succeeded)
+            {
+                return todo;
+            }
+            else if (User.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         [HttpDelete("{id}")]
@@ -83,7 +99,7 @@ namespace TodoListService.Controllers
         public IActionResult Post([FromBody] Todo todo)
         {
             int id = TodoStore.Values.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1;
-            Todo todonew = new Todo() { Id = id, Owner = HttpContext.User.Identity.Name, Title = todo.Title };
+            Todo todonew = new Todo() { Id = id, Owner = HttpContext.User.Identity.Name, Title = todo.Title, MoveInDate = todo.MoveInDate };
             TodoStore.Add(id, todonew);
 
             return Ok(todo);

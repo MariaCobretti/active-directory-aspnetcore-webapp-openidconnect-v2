@@ -39,16 +39,18 @@ namespace TodoListService
                     Configuration.Bind("AzureAdB2C", options);
 
                     options.TokenValidationParameters.NameClaimType = "name";
-                    options.TokenValidationParameters.RoleClaimType = "groups";
+                    //options.TokenValidationParameters.RoleClaimType = "groups";
                 });
 
             services.AddControllers();
             services.AddAuthorization(options =>
             {
                 // Create policy to check for the scope 'read'
-                options.AddPolicy("ReadScope", 
-                    policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
+                options.AddPolicy("ReadScope", policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
+                options.AddPolicy("EditTaskPolicy", policy => policy.Requirements.Add(new MoveInDateRequirement()));
             });
+
+            services.AddSingleton<IAuthorizationHandler, EditTaskAuthorizationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

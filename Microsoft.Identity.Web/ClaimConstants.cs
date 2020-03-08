@@ -28,5 +28,8 @@ namespace Microsoft.Identity.Web
         public const string Acr = "acr";
         public const string UserFlow = "http://schemas.microsoft.com/claims/authnclassreference";
         public const string Tfp = "tfp";
+
+        // Custom claims
+        public const string MoveInDate = "extension_MoveInDate";
     }
 }

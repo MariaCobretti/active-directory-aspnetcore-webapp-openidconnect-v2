@@ -20,6 +20,11 @@
             <span asp-validation-for="Owner" class="text-danger"></span>
         </div>
         <div class="form-group">
+            <label asp-for="MoveInDate" class="control-label"></label>
+            <input asp-for="MoveInDate" class="form-control" readonly="readonly"/>
+            <span asp-validation-for="MoveInDate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
             <input type="submit" value="Save" class="btn btn-primary" />
         </div>
     </form>
