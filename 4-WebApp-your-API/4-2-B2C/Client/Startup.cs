@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +16,9 @@ using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 using TodoListClient.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Graph;
 using Microsoft.Identity.Web.UI;
+using TodoListClient;
 
 namespace WebApp_OpenIDConnect_DotNet
 {
@@ -59,6 +64,19 @@ namespace WebApp_OpenIDConnect_DotNet
             // Add APIs
             services.AddTodoListService(Configuration);
 
+            // microsoft graph-rest
+            services.AddMSGraphService(Configuration);
+            services.AddAutomatedGraphClient(Configuration);
+
+            //graphServiceClientFactory
+            //services.AddGraphService(Configuration);
+
+            //services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            //    {
+            //        var tokenEx = TokenExtension.Instance;
+            //        options.Events.OnTokenValidated += context => tokenEx.SecurityTokenValidated(context);
+            //    });
+
             services.AddControllersWithViews(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -70,7 +88,7 @@ namespace WebApp_OpenIDConnect_DotNet
             services.AddRazorPages();
 
             //Configuring appsettings section AzureAdB2C, into IOptions
-            services.AddOptions();
+            //services.AddOptions();
             services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureAdB2C"));
         }
 

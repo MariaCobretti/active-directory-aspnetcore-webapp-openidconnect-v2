@@ -8,9 +8,11 @@ using Microsoft.Identity.Web;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using TodoListService.Models;
@@ -35,13 +37,21 @@ namespace TodoListClient.Services
         private readonly string _TodoListScope = string.Empty;
         private readonly string _TodoListReadScope = string.Empty;
         private readonly string _TodoListBaseAddress = string.Empty;
+        private readonly string _UserReadScope = "User.Read";
+        private readonly string _DirectoryReadAllScope = "Directory.Read.All";
         private readonly ITokenAcquisition _tokenAcquisition;
 
-        public TodoListService(ITokenAcquisition tokenAcquisition, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor contextAccessor)
+        // having this dependency here is not so nice
+        private readonly IMSGraphService _graphService;
+        private readonly IAutomatedGraphClient _automatedGraphClient;
+
+        public TodoListService(ITokenAcquisition tokenAcquisition, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor contextAccessor, IMSGraphService graphService, IAutomatedGraphClient automatedGraphClient)
         {
             _httpClient = httpClient;
             _tokenAcquisition = tokenAcquisition;
             _contextAccessor = contextAccessor;
+            _graphService = graphService;
+            _automatedGraphClient = automatedGraphClient;
             _TodoListScope = configuration["TodoList:TodoListScope"];
             _TodoListReadScope = configuration["TodoList:ReadScope"];
             _TodoListBaseAddress = configuration["TodoList:TodoListBaseAddress"];
@@ -104,7 +114,7 @@ namespace TodoListClient.Services
         public async Task<IEnumerable<Todo>> GetAsync()
         {
             await PrepareAuthenticatedClient();
-
+            
             var response = await _httpClient.GetAsync($"{ _TodoListBaseAddress}/api/todolist");
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -119,7 +129,15 @@ namespace TodoListClient.Services
 
         private async Task PrepareAuthenticatedClient()
         {
+            
+            var groups = await _automatedGraphClient.GetCurrentUsersGroupsAsync("a53c99d6-40a9-4f1f-b503-c16eb537cc2a");
+            _contextAccessor.HttpContext.User.Identities.FirstOrDefault()?.AddClaims(groups.Select(group => new Claim(ClaimTypes.Role, group.DisplayName, ClaimValueTypes.String)));
+
+            //var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _TodoListScope, _TodoListReadScope });
+
             var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _TodoListScope, _TodoListReadScope });
+            //var graphAccessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _UserReadScope, _DirectoryReadAllScope });
+
             Debug.WriteLine($"access token-{accessToken}");
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

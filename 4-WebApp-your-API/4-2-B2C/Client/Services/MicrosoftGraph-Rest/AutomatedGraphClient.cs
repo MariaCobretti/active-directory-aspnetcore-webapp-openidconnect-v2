@@ -38,18 +38,28 @@ namespace TodoListClient.Services
     /// <summary>
     /// MSGraph service has samples to show how to call Microsoft Graph using the Graph SDK
     /// </summary>
-    public class MSGraphService : IMSGraphService
+    public class AutomatedGraphClient : IAutomatedGraphClient
     {
-        private readonly WebOptions webOptions;
+        private readonly AutomatedGraphClientOptions _automatedGraphClientOptions;
 
         // the Graph SDK's GraphServiceClient
         private GraphServiceClient _graphServiceClient;
 
         /// <summary>Initializes a new instance of the <see cref="MSGraphService"/> class.</summary>
-        /// <param name="webOptionValue">The web option value.</param>
-        public MSGraphService(IOptions<WebOptions> webOptionValue)
+        /// <param name="options">The web option value.</param>
+        public AutomatedGraphClient(IOptions<AutomatedGraphClientOptions> options)
         {
-            webOptions = webOptionValue.Value;
+            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
+                .Create(options.Value.ClientId)
+                .WithTenantId(options.Value.TenantId)
+                .WithClientSecret(options.Value.ClientSecret)
+                .Build();
+            ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
+
+            // Set up the Microsoft Graph service client with client credentials
+            _graphServiceClient = new GraphServiceClient(authProvider);
+
+            _automatedGraphClientOptions = options.Value;
         }
 
         /// <summary>Gets basic details about the signed-in user.</summary>
@@ -61,7 +71,7 @@ namespace TodoListClient.Services
 
             try
             {
-                PrepareAuthenticatedClient(accessToken);
+                //PrepareAuthenticatedClient(accessToken);
                 currentUserObject = await _graphServiceClient.Me.Request().GetAsync();
             }
             catch (ServiceException e)
@@ -78,7 +88,7 @@ namespace TodoListClient.Services
         /// <returns>The photo of the signed-in user as a base64 string</returns>
         public async Task<string> GetMyPhotoAsync(string accessToken)
         {
-            PrepareAuthenticatedClient(accessToken);
+            //PrepareAuthenticatedClient(accessToken);
 
             try
             {
@@ -115,18 +125,18 @@ namespace TodoListClient.Services
         }
 
         /// <summary>Gets the groups the signed-in user's is a member of.</summary>
-        /// <param name="accessToken">The access token for MS Graph.</param>
+        /// <param name="userId">The access token for MS Graph.</param>
         /// <returns>A list of Groups</returns>
-        public async Task<IList<Group>> GetCurrentUsersGroupsAsync(string accessToken)
+        public async Task<IList<Group>> GetCurrentUsersGroupsAsync(string userId)
         {
             IUserMemberOfCollectionWithReferencesPage memberOfGroups = null;
             IList<Group> groups = new List<Group>();
 
             try
             {
-                PrepareAuthenticatedClient(accessToken);
+                //PrepareAuthenticatedClient(accessToken);
 
-                memberOfGroups = await _graphServiceClient.Me.MemberOf.Request().GetAsync();
+                memberOfGroups = await _graphServiceClient.Users[userId].MemberOf.Request().GetAsync();
 
                 if (memberOfGroups != null)
                 {
@@ -175,7 +185,7 @@ namespace TodoListClient.Services
 
             try
             {
-                PrepareAuthenticatedClient(accessToken);
+                //PrepareAuthenticatedClient(accessToken);
                 memberOfDirectoryRoles = await _graphServiceClient.Me.MemberOf.Request().GetAsync();
 
                 if (memberOfDirectoryRoles != null)
@@ -225,7 +235,7 @@ namespace TodoListClient.Services
 
             try
             {
-                PrepareAuthenticatedClient(accessToken);
+                //PrepareAuthenticatedClient(accessToken);
                 memberOfDirectoryRoles = await _graphServiceClient.Me.MemberOf.Request().GetAsync();
 
                 if (memberOfDirectoryRoles != null)
@@ -278,7 +288,7 @@ namespace TodoListClient.Services
         public async Task<List<Group>> GetMyMemberOfGroupsAsync(string accessToken)
         {
             List<Group> groups = new List<Group>();
-            PrepareAuthenticatedClient(accessToken); 
+            //PrepareAuthenticatedClient(accessToken); 
             // Get groups the current user is a direct member of.
             IUserMemberOfCollectionWithReferencesPage memberOfGroups = await _graphServiceClient.Me.MemberOf.Request().GetAsync();
             if (memberOfGroups?.Count > 0)
@@ -329,7 +339,7 @@ namespace TodoListClient.Services
 
             try
             {
-                PrepareAuthenticatedClient(accessToken);
+                //PrepareAuthenticatedClient(accessToken);
                 IGraphServiceUsersCollectionPage users = await _graphServiceClient.Users.Request().GetAsync();
 
                 // When paginating
@@ -353,30 +363,6 @@ namespace TodoListClient.Services
             }
 
             return allUsers;
-        }
-
-        /// <summary>
-        /// Prepares the authenticated client.
-        /// </summary>
-        /// <param name="accessToken">The access token.</param>
-        private void PrepareAuthenticatedClient(string accessToken)
-        {
-            try
-            {
-                _graphServiceClient = new GraphServiceClient(webOptions.GraphApiUrl,
-                                                                     new DelegateAuthenticationProvider(
-                                                                         async (requestMessage) =>
-                                                                         {
-                                                                             await Task.Run(() =>
-                                                                             {
-                                                                                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", accessToken);
-                                                                             });
-                                                                         }));
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Could not create a graph client {ex}");
-            }
         }
     }
 }

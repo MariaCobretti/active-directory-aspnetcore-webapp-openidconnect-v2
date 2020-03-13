@@ -25,7 +25,7 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
         public async Task<IActionResult> Index()
         {
             // Using group ids/names in the IsInRole method
-            // var isinrole = User.IsInRole("8873daa2-17af-4e72-973e-930c94ef7549");
+            var isinrole = User.IsInRole("d206a687-949c-481d-92ab-710ed5b66845");
 
             string accessToken = await tokenAcquisition.GetAccessTokenForUserAsync(new[] { Constants.ScopeUserRead, Constants.ScopeDirectoryReadAll });
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace TodoListClient.Services
 {
@@ -19,6 +20,12 @@ namespace TodoListClient.Services
         {
             services.Configure<WebOptions>(configuration);
             services.AddSingleton<IMSGraphService, MSGraphService>();
+        }
+
+        public static void AddAutomatedGraphClient(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<AutomatedGraphClientOptions>(configuration.GetSection(nameof(AutomatedGraphClient)));
+            services.AddSingleton<IAutomatedGraphClient, AutomatedGraphClient>();
         }
     }
 }
