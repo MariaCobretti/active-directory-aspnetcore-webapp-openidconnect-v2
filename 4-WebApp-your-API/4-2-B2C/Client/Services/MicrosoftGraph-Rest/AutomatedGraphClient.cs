@@ -49,6 +49,13 @@ namespace TodoListClient.Services
         /// <param name="options">The web option value.</param>
         public AutomatedGraphClient(IOptions<AutomatedGraphClientOptions> options)
         {
+            // impersonating
+            //IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
+            //    .CreateWithApplicationOptions(applicationOptions)
+            //    .WithRedirectUri(currentUri)
+            //    .WithB2CAuthority(authority)
+            //    .Build();
+
             IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
                 .Create(options.Value.ClientId)
                 .WithTenantId(options.Value.TenantId)

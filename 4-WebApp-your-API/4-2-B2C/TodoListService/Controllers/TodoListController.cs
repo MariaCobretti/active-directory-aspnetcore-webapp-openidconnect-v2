@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoListService.Infrastructure;
 using TodoListService.Models;
 
 namespace TodoListService.Controllers
@@ -58,6 +59,7 @@ namespace TodoListService.Controllers
         // GET: api/values
         [HttpGet]
         [Authorize(Policy = "ReadScope")]
+        //[Authorize(Policy = Constants.AuthorizationPolicies.AssignmentToDirectoryViewerRoleRequired)]
         public IEnumerable<Todo> Get()
         {
             var role = User.Claims;

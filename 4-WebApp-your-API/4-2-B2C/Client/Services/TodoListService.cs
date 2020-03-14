@@ -129,14 +129,16 @@ namespace TodoListClient.Services
 
         private async Task PrepareAuthenticatedClient()
         {
-            
-            var groups = await _automatedGraphClient.GetCurrentUsersGroupsAsync("a53c99d6-40a9-4f1f-b503-c16eb537cc2a");
-            _contextAccessor.HttpContext.User.Identities.FirstOrDefault()?.AddClaims(groups.Select(group => new Claim(ClaimTypes.Role, group.DisplayName, ClaimValueTypes.String)));
+            //var objectId = _contextAccessor.HttpContext.User.GetObjectId();
+            //var groups = await _automatedGraphClient.GetCurrentUsersGroupsAsync(objectId);
+            //_contextAccessor.HttpContext.User.Identities.FirstOrDefault()?.AddClaims(groups.Select(group => new Claim(ClaimTypes.Role, group.DisplayName, ClaimValueTypes.String)));
 
-            //var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _TodoListScope, _TodoListReadScope });
-
+            //var accessToken2 = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { "openid" });
             var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _TodoListScope, _TodoListReadScope });
-            //var graphAccessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { _UserReadScope, _DirectoryReadAllScope });
+
+            //var currentUsersGroupsAsync = await _graphService.GetCurrentUsersGroupsAsync(accessToken);
+            //_contextAccessor.HttpContext.User.Identities.FirstOrDefault()?.AddClaims(currentUsersGroupsAsync.Select(group => new Claim(ClaimTypes.Role, group.DisplayName, ClaimValueTypes.String)));
+
 
             Debug.WriteLine($"access token-{accessToken}");
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

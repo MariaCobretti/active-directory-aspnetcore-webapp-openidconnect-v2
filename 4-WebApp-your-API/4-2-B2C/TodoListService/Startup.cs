@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -8,9 +9,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using TodoListService.AuthorizationPolicies;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using TodoListService.Infrastructure;
 
 namespace TodoListService
 {
@@ -26,12 +29,6 @@ namespace TodoListService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // This is required to be instantiated before the OpenIdConnectOptions starts getting configured.
-            // By default, the claims mapping will map claim names in the old format to accommodate older SAML applications.
-            // 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role' instead of 'roles'
-            // This flag ensures that the ClaimsIdentity claims collection will be built from the claims in the token
-            // JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-
             // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddProtectedWebApi("AzureAdB2C", Configuration, options =>
@@ -40,15 +37,27 @@ namespace TodoListService
 
                     options.TokenValidationParameters.NameClaimType = "name";
                     //options.TokenValidationParameters.RoleClaimType = "groups";
+                    //options.TokenValidationParameters.RoleClaimType = "roles";
                 });
 
-            services.AddControllers();
+            // This is required to be instantiated before the OpenIdConnectOptions starts getting configured.
+            // By default, the claims mapping will map claim names in the old format to accommodate older SAML applications.
+            // 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role' instead of 'roles'
+            // This flag ensures that the ClaimsIdentity claims collection will be built from the claims in the token
+            //JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
+            // Adding authorization policies that enforce authorization using Azure AD roles.
             services.AddAuthorization(options =>
             {
-                // Create policy to check for the scope 'read'
                 options.AddPolicy("ReadScope", policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
                 options.AddPolicy("EditTaskPolicy", policy => policy.Requirements.Add(new MoveInDateRequirement()));
+
+                //options.AddPolicy(Constants.AuthorizationPolicies.AssignmentToUserReaderRoleRequired, policy => policy.RequireRole(Constants.AppRole.UserReaders));
+                //options.AddPolicy(Constants.AuthorizationPolicies.AssignmentToDirectoryViewerRoleRequired, policy => policy.RequireRole(Constants.AppRole.DirectoryViewers));
             });
+
+            services.AddControllers();
+
 
             services.AddSingleton<IAuthorizationHandler, EditTaskAuthorizationHandler>();
         }
