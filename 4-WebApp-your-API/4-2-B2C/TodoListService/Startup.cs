@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -49,8 +50,14 @@ namespace TodoListService
             // Adding authorization policies that enforce authorization using Azure AD roles.
             services.AddAuthorization(options =>
             {
+                // policy discussion
+                // https://stackoverflow.com/questions/31464359/how-do-you-create-a-custom-authorizeattribute-in-asp-net-core/31465227
                 options.AddPolicy("ReadScope", policy => policy.Requirements.Add(new ScopesRequirement("tasks.read")));
                 options.AddPolicy("EditTaskPolicy", policy => policy.Requirements.Add(new MoveInDateRequirement()));
+                options.AddPolicy("AdminOrDispatcher", policy => policy.RequireClaim("groups", "Admin", "Dispatcher"));
+                //options.AddPolicy(Constants.AuthorizationPolicies.AssignmentToAdminGroupRequired, policy => policy.Requirements.Add(new GroupsRequirement(Constants.Groups.Admin)));
+
+
 
                 //options.AddPolicy(Constants.AuthorizationPolicies.AssignmentToUserReaderRoleRequired, policy => policy.RequireRole(Constants.AppRole.UserReaders));
                 //options.AddPolicy(Constants.AuthorizationPolicies.AssignmentToDirectoryViewerRoleRequired, policy => policy.RequireRole(Constants.AppRole.DirectoryViewers));

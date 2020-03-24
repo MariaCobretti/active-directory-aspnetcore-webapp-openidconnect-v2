@@ -23,6 +23,12 @@ namespace TodoListService.Infrastructure
             public const string DirectoryViewers = "DirectoryViewers";
         }
 
+        public static class Groups
+        {
+            public const string Admin = "Admin";
+            public const string User = "User";
+        }
+
         /// <summary>
         /// Wrapper class the contain all the authorization policies available in this application.
         /// </summary>
@@ -30,6 +36,8 @@ namespace TodoListService.Infrastructure
         {
             public const string AssignmentToUserReaderRoleRequired = "AssignmentToUserReaderRoleRequired";
             public const string AssignmentToDirectoryViewerRoleRequired = "AssignmentToDirectoryViewerRoleRequired";
+
+            public const string AssignmentToAdminGroupRequired = "AssignmentToAdminGroupRequired";
         }
     }
 }

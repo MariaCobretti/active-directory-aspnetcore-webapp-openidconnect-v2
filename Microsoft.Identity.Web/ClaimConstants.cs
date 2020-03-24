@@ -29,7 +29,10 @@ namespace Microsoft.Identity.Web
         public const string UserFlow = "http://schemas.microsoft.com/claims/authnclassreference";
         public const string Tfp = "tfp";
 
-        // Custom claims
+        // from custom claim provider
+        public const string Groups = "groups";
+
+        // Custom claim extension
         public const string MoveInDate = "extension_MoveInDate";
     }
 }

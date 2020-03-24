@@ -59,6 +59,8 @@ namespace TodoListService.Controllers
         // GET: api/values
         [HttpGet]
         [Authorize(Policy = "ReadScope")]
+        [Authorize(Policy = "AdminOrDispatcher")]
+        //[Authorize(Policy = Constants.AuthorizationPolicies.AssignmentToAdminGroupRequired)]
         //[Authorize(Policy = Constants.AuthorizationPolicies.AssignmentToDirectoryViewerRoleRequired)]
         public IEnumerable<Todo> Get()
         {
